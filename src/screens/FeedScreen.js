@@ -6,16 +6,44 @@ import {
   Image,
   StyleSheet,
   TouchableOpacity,
+  Dimensions,
 } from 'react-native';
 import { PostsContext } from '../context/PostsContext';
 
+const screenWidth = Dimensions.get('window').width;
+
 export default function FeedScreen({ route, navigation }) {
-  const { posts } = useContext(PostsContext);
+  const { posts, isPostsLoading } = useContext(PostsContext); // ✅ ahora con loading
   const { groupId, groupName } = route.params;
+
+  if (!groupId || !groupName) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.emptyText}>Error: grupo no disponible.</Text>
+      </View>
+    );
+  }
+
+  if (isPostsLoading) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.emptyText}>Cargando publicaciones...</Text>
+      </View>
+    );
+  }
 
   const groupPosts = posts
     .filter((post) => post.groupId === groupId)
     .sort((a, b) => b.timestamp - a.timestamp);
+
+  const formatDate = (timestamp) => {
+    const date = new Date(timestamp);
+    return date.toLocaleDateString('es-ES', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    });
+  };
 
   const renderItem = ({ item }) => (
     <View style={styles.card}>
@@ -24,10 +52,18 @@ export default function FeedScreen({ route, navigation }) {
           navigation.navigate('ImageViewer', { image: item.image })
         }
       >
-        <Image source={{ uri: item.image }} style={styles.image} />
+        <View style={styles.imageWrapper}>
+          <Image
+            source={{ uri: item.image }}
+            style={styles.image}
+            resizeMode="cover"
+          />
+          <Text style={styles.dateText}>{formatDate(item.timestamp)}</Text>
+        </View>
       </TouchableOpacity>
+
       <Text style={styles.title}>{item.title}</Text>
-      <Text style={styles.description}>{item.description}</Text>
+      <Text style={styles.description}>{item.comment}</Text>
     </View>
   );
 
@@ -69,7 +105,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   list: {
-    padding: 12,
+    paddingBottom: 80,
   },
   header: {
     fontSize: 22,
@@ -78,25 +114,38 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   card: {
-    marginBottom: 20,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 10,
-    padding: 10,
+    marginBottom: 24,
+  },
+  imageWrapper: {
+    position: 'relative',
+    width: screenWidth,
+    height: screenWidth,
+    alignSelf: 'center',
   },
   image: {
     width: '100%',
-    height: 300,
-    borderRadius: 10,
-    marginBottom: 8,
+    height: '100%',
+  },
+  dateText: {
+    position: 'absolute',
+    bottom: 8,
+    alignSelf: 'center',
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '600',
   },
   title: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
+    textAlign: 'center',
+    marginTop: 8,
     marginBottom: 4,
   },
   description: {
     fontSize: 14,
     color: '#333',
+    textAlign: 'center',
+    paddingHorizontal: 16,
   },
   emptyContainer: {
     flex: 1,
@@ -126,5 +175,3 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
 });
-
-

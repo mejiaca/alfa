@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
   View,
   Text,
@@ -8,9 +8,11 @@ import {
   Alert,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { AuthContext } from '../context/AuthContext'; // ✅ conexión con el contexto
 
 export default function LoginScreen({ navigation }) {
   const [username, setUsername] = useState('');
+  const { login } = useContext(AuthContext); // ✅ obtiene login del contexto
 
   useEffect(() => {
     const checkUser = async () => {
@@ -31,7 +33,7 @@ export default function LoginScreen({ navigation }) {
       return;
     }
 
-    await AsyncStorage.setItem('username', username.trim());
+    await login(username.trim()); // ✅ actualiza estado global y AsyncStorage
     navigation.reset({
       index: 0,
       routes: [{ name: 'MainTabs' }],
@@ -63,4 +65,3 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
 });
-

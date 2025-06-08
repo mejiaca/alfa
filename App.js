@@ -1,16 +1,18 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext, useRef } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ActivityIndicator, View } from 'react-native';
+import * as Linking from 'expo-linking';
 
+import { AuthProvider, AuthContext } from './src/context/AuthContext';
 import { PostsProvider } from './src/context/PostsContext';
-import { AuthProvider } from './src/context/AuthContext';
+import { GroupsProvider, GroupsContext } from './src/context/GroupsContext';
 
 import GroupListScreen from './src/screens/GroupListScreen';
 import FeedScreen from './src/screens/FeedScreen';
-import CreatePostScreen from './src/screens/CreatePostScreen'; // o UploadScreen si decides renombrar
+import CreatePostScreen from './src/screens/CreatePostScreen';
 import MyPostsScreen from './src/screens/MyPostsScreen';
 import ImageViewerScreen from './src/screens/ImageViewerScreen';
 import LoginScreen from './src/screens/LoginScreen';
@@ -48,33 +50,83 @@ function MainTabs() {
   );
 }
 
-export default function App() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [initialRoute, setInitialRoute] = useState('Login');
+function AppContent() {
+  const { user, isAuthLoading, login } = useContext(AuthContext);
+  const { inviteUserToGroup } = useContext(GroupsContext);
+  const [initialRoute, setInitialRoute] = useState(null); // <- actualizado
+  const navigationRef = useRef();
 
   useEffect(() => {
-    const checkUser = async () => {
-      const user = await AsyncStorage.getItem('username');
-      setInitialRoute(user ? 'MainTabs' : 'Login');
-      setIsLoading(false);
+    const handleDeepLink = async (event) => {
+      const data = Linking.parse(event.url);
+      if (data.scheme === 'clanapp' && data.path === 'invite') {
+        const { groupId, groupName, username } = data.queryParams;
+
+        if (username) {
+          await login(username);
+        }
+
+        if (username && groupId) {
+          inviteUserToGroup(username, groupId);
+        }
+
+        setTimeout(() => {
+          navigationRef.current?.navigate('Feed', {
+            groupId,
+            groupName,
+          });
+        }, 500);
+      }
     };
-    checkUser();
+
+    Linking.addEventListener('url', handleDeepLink);
+    Linking.getInitialURL().then((url) => {
+      if (url) handleDeepLink({ url });
+    });
+
+    return () => {
+      Linking.removeAllListeners('url');
+    };
   }, []);
 
-  if (isLoading) return null;
+  useEffect(() => {
+    if (!isAuthLoading) {
+      setInitialRoute(user ? 'MainTabs' : 'Login'); // <- actualizado
+    }
+  }, [isAuthLoading, user]);
 
+  if (isAuthLoading || !initialRoute) {
+    // <- actualizado
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#007aff" />
+      </View>
+    );
+  }
+
+  return (
+    <NavigationContainer ref={navigationRef}>
+      <Stack.Navigator
+        initialRouteName={initialRoute}
+        screenOptions={{ headerShown: false }}
+      >
+        <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen name="MainTabs" component={MainTabs} />
+        <Stack.Screen name="Feed" component={FeedScreen} />
+        <Stack.Screen name="CreatePost" component={CreatePostScreen} />
+        <Stack.Screen name="ImageViewer" component={ImageViewerScreen} />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}
+
+export default function App() {
   return (
     <AuthProvider>
       <PostsProvider>
-        <NavigationContainer>
-          <Stack.Navigator initialRouteName={initialRoute} screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="Login" component={LoginScreen} />
-            <Stack.Screen name="MainTabs" component={MainTabs} />
-            <Stack.Screen name="Feed" component={FeedScreen} />
-            <Stack.Screen name="CreatePost" component={CreatePostScreen} />
-            <Stack.Screen name="ImageViewer" component={ImageViewerScreen} />
-          </Stack.Navigator>
-        </NavigationContainer>
+        <GroupsProvider>
+          <AppContent />
+        </GroupsProvider>
       </PostsProvider>
     </AuthProvider>
   );

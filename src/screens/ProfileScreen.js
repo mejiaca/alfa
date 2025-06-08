@@ -6,6 +6,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -13,12 +14,10 @@ import { AuthContext } from '../context/AuthContext';
 import { PostsContext } from '../context/PostsContext';
 
 export default function ProfileScreen({ navigation }) {
-  const { user, logout } = useContext(AuthContext);
+  const { user, logout, isAuthLoading } = useContext(AuthContext);
   const { posts } = useContext(PostsContext);
 
   const [profileImage, setProfileImage] = useState(null);
-
-  const postCount = posts.filter((p) => p.username === user?.username).length;
 
   useEffect(() => {
     const loadProfileImage = async () => {
@@ -78,6 +77,17 @@ export default function ProfileScreen({ navigation }) {
     ]);
   };
 
+  // ✅ Protección: espera que el usuario esté cargado
+  if (isAuthLoading || !user) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#007aff" />
+      </View>
+    );
+  }
+
+  const postCount = posts.filter((p) => p.username === user.username).length;
+
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={handlePickImage} onLongPress={handleRemoveImage}>
@@ -91,7 +101,7 @@ export default function ProfileScreen({ navigation }) {
         />
       </TouchableOpacity>
 
-      <Text style={styles.username}>{user?.username}</Text>
+      <Text style={styles.username}>{user.username}</Text>
       <Text style={styles.stats}>Publicaciones: {postCount}</Text>
 
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>

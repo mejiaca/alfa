@@ -7,23 +7,46 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
+    "scheme": "clanapp",
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "platforms": ["ios", "android"],  // ← esta línea asegura que no se compile para web
     "ios": {
-      "supportsTablet": true
+      "bundleIdentifier": "com.mejiaca.alfa",
+      "supportsTablet": true,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
+      "package": "com.mejiaca.alfa",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "data": {
+            "scheme": "clanapp",
+            "host": "*"
+          },
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
+      ],
       "edgeToEdgeEnabled": true
     },
-    "web": {
-      "favicon": "./assets/favicon.png"
-    }
+    "extra": {
+      "eas": {
+        "projectId": "7f76b993-6d64-4a83-b939-b0013e474d70"
+      }
+    },
+    "owner": "mejiaca"
   }
 }

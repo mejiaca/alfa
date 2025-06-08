@@ -13,7 +13,7 @@ import { PostsContext } from '../context/PostsContext';
 import { AuthContext } from '../context/AuthContext';
 
 export default function CreatePostScreen({ route, navigation }) {
-  const { groupId, groupName } = route.params;
+  const { groupId, groupName } = route.params || {};
   const { addPost } = useContext(PostsContext);
   const { user } = useContext(AuthContext);
 
@@ -62,6 +62,17 @@ export default function CreatePostScreen({ route, navigation }) {
     });
   };
 
+  // ✅ Verificación temprana de datos críticos
+  if (!groupId || !groupName || !user) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.warningText}>
+          Error: datos incompletos para crear publicación.
+        </Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       {image && (
@@ -107,5 +118,11 @@ const styles = StyleSheet.create({
   textArea: {
     height: 100,
     textAlignVertical: 'top',
+  },
+  warningText: {
+    fontSize: 16,
+    color: 'red',
+    textAlign: 'center',
+    marginTop: 40,
   },
 });
