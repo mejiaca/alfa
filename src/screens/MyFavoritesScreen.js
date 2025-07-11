@@ -3,13 +3,11 @@ import {  View, Text, FlatList, Image, StyleSheet, Alert, TextInput, Button, Mod
 import { useFocusEffect } from '@react-navigation/native';
 import  TopBar from '../components/TopBar';
 import  ItemUserPost from '../components/ItemUserPost';
-import  ModalDialogo from '../components/ModalDialogo';
 import { AppContext } from '../context/State';
-import { getUserPosts, updatePost  } from '../context/Actions';
+import { getUserFavs, removePost, updatePost  } from '../context/Actions';
 
-
-export default function MyPostsScreen({navigation}) {
-  const { dispatch, user, userPosts } = useContext(AppContext);
+export default function MyFavoritesScreen({navigation}) {
+  const { dispatch, user, userFavs, storagePath } = useContext(AppContext);
   const [selectedPost, setSelectedPost] = useState(null);
   const [editedTitle, setEditedTitle] = useState('');
   const [editedComment, setEditedComment] = useState('');
@@ -17,7 +15,7 @@ export default function MyPostsScreen({navigation}) {
 
   useFocusEffect(
     useCallback(() => {
-      getUserPosts(dispatch, user.user_id);
+      getUserFavs(dispatch, user.user_id);
     }, [])
   ); 
 
@@ -28,61 +26,36 @@ export default function MyPostsScreen({navigation}) {
     setModalVisible(true);
   };
 
-  const handleUpdate = () => {
-    if (!editedTitle.trim() || !editedComment.trim()) {
-      Alert.alert('Faltan datos', 'Completa todos los campos.');
-      return;
-    }
-
-    updatePost({
-      ...selectedPost,
-      title: editedTitle,
-      comment: editedComment,
-    });
-
-    setModalVisible(false);
-  };
-
   const renderItem = ({ item }) => (
     <ItemUserPost 
-      item={item}  
+      dispatch={dispatch} 
+      item={item} 
+      storagePath={storagePath} 
       openEditModal={openEditModal} 
+      tipo={'favorito'}
       navigation={navigation} 
-      tipo={'post'}
     />
   );
 
-  if (userPosts.length === 0) {
+  if (userFavs.length === 0) {
     return (
       <View style={styles.center}>
-        <Text style={styles.noPosts}>Aún no has subido publicaciones.</Text>
+        <Text style={styles.noPosts}>No tienes publicaciones favoritas.</Text>
       </View>
     );
   }
 
   return (
     <View style={{ flex: 1 }}>
-      <TopBar navigation={navigation}/>
+      <TopBar titulo={'Mis Favoritos'} tipo={'favorito'} navigation={navigation}/>
 
       <FlatList
-        data={userPosts}
+        data={userFavs}
         keyExtractor={(item, index) => index.toString()}
         contentContainerStyle={styles.container}
         renderItem={renderItem}
         showsVerticalScrollIndicator={false}
       />
-
-      <ModalDialogo 
-        tipo={'post'}
-        title={'Editar publicación'}
-        modalVisible={modalVisible} 
-        setModalVisible={setModalVisible}
-        editedTitle={editedTitle}
-        setEditedTitle={setEditedTitle}
-        editedComment={editedComment}
-        setEditedComment={setEditedComment}
-      />
-
     </View>
   );
 }

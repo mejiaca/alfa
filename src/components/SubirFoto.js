@@ -6,20 +6,15 @@ import {
   StyleSheet,
   TouchableOpacity,
   Alert,
-  ActivityIndicator,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImageManipulator from 'expo-image-manipulator';
 import { AntDesign, Ionicons } from '@expo/vector-icons';
-import { AuthContext } from '../context/AuthContext';
-import { PostsContext } from '../context/PostsContext';
-import CampoItem from '../components/CampoItem';
 
 import { AppContext } from '../context/State';
-import { logOut, updateUserPic, getUser } from '../context/Actions';
+import { logOut, updateUserPic } from '../context/Actions';
 
-export default function ProfileScreen({ navigation }) {
+export default function SubirFoto({ setUriFoto }) {
   const { dispatch, user, storagePath } = useContext(AppContext);
   const [profileImage, setProfileImage] = useState(null);
 
@@ -67,47 +62,30 @@ export default function ProfileScreen({ navigation }) {
       let data = {
         foto: picname + '?' + Date.now()
       }
-      updateUserPic(dispatch, user.user_id, uri, picname, data, endPost);
+      // updateUserPic(dispatch, user.user_id, uri, picname, data, endPost);
       setProfileImage(uri);
+      setUriFoto(uri);
     }
   };
 
-  const endPost = (value, userid) => {
-    getUser(dispatch, userid, null);
-  }
-
-  const handleLogout = () => {
-    Alert.alert('Cerrar sesión', '¿Estás seguro que deseas salir?', [
-      { text: 'Cancelar', style: 'cancel' },
-      {
-        text: 'Sí',
-        style: 'destructive',
-        onPress: async () => {
-          logOut(dispatch, salir);
-          // await logout();
-          // navigation.reset({
-          //   index: 0,
-          //   routes: [{ name: 'Login' }],
-          // });
-        },
-      },
-    ]);
+  const handleRemoveImage = async () => {
+    // Alert.alert('Eliminar foto', '¿Deseas quitar tu foto de perfil?', [
+    //   { text: 'Cancelar', style: 'cancel' },
+    //   {
+    //     text: 'Quitar',
+    //     style: 'destructive',
+    //     onPress: async () => {
+    //       setProfileImage(null);
+    //       // await AsyncStorage.removeItem('profileImage');
+    //     },
+    //   },
+    // ]);
   };
 
-  const editProfile = () => {
-
-  };
-
-  const salir = (value) => {
-    // navigation.reset({
-    //   index: 0,
-    //   routes: [{ name: 'Login' }],
-    // });
-  };
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={handlePickImage}>
+      <TouchableOpacity  onPress={handlePickImage} onLongPress={handleRemoveImage}>
         <Image
           source={ profileImage ? { uri: profileImage }  : require('../assets/images/avatar.png') }
           style={styles.avatar}
@@ -116,41 +94,18 @@ export default function ProfileScreen({ navigation }) {
             <Ionicons name="camera-outline" size={20} color="#fff" />
         </View>
       </TouchableOpacity>
-
-      <Text style={styles.username}>{user.nombre}</Text>
-
-      <CampoItem titulo="Usuario:"  value={user.usuario}/>
-      <CampoItem titulo="Nombre:"  value={user.nombre}/>
-      <CampoItem titulo="Número Celular:"  value={user.user_id}/>
-      
-      <View style={{marginBottom:50}}></View>
-
-      <View style={{flexDirection:'row'}}>
-        <TouchableOpacity style={styles.editarButton} onPress={editProfile}>
-          <Text style={styles.logoutText}>Editar</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <Text style={styles.logoutText}>Cerrar sesión</Text>
-        </TouchableOpacity>
-      </View>
-
-      <Text style={styles.note}>versión: 1.0.1</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 20,
-    // backgroundColor: '#fff',
   },
   avatar: {
-    width: 160,
-    height: 160,
+    width: 120,
+    height: 120,
     borderRadius: 80,
     borderWidth: 2,
     borderColor: '#ccc',

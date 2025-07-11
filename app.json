@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "alfa",
+    "name": "Alfa",
     "slug": "alfa",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -13,20 +13,26 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "platforms": ["ios", "android"],  // ← esta línea asegura que no se compile para web
+    "platforms": [
+      "ios",
+      "android"
+    ],
     "ios": {
-      "bundleIdentifier": "com.mejiaca.alfa",
+      "bundleIdentifier": "com.levapan.alfa",
       "supportsTablet": true,
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSContactsUsageDescription": "Esta app necesita acceso a tus contactos para invitar amigos.",
+        "NSPhotoLibraryUsageDescription": "Esta app necesita acceso a tus fotos para que puedas seleccionar imágenes."
       }
     },
     "android": {
+      "permissions": ["READ_CONTACTS", "READ_MEDIA_IMAGES", "READ_EXTERNAL_STORAGE"],
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.mejiaca.alfa",
+      "package": "com.levapan.alfa",
       "intentFilters": [
         {
           "action": "VIEW",
@@ -44,9 +50,8 @@
     },
     "extra": {
       "eas": {
-        "projectId": "7f76b993-6d64-4a83-b939-b0013e474d70"
+        "projectId": "556d4642-6d35-47e2-bfcb-2cc34869973b"
       }
-    },
-    "owner": "mejiaca"
+    }
   }
 }

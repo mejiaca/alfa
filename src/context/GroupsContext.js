@@ -15,7 +15,7 @@ export const GroupsProvider = ({ children }) => {
 
         if (storedGroups) {
           const parsedGroups = JSON.parse(storedGroups);
-          console.log('📁 Grupos cargados desde storage:', parsedGroups);
+          // console.log('📁 Grupos cargados desde storage:', parsedGroups);
           setGroups(parsedGroups);
         } else {
           console.log('📁 No hay grupos almacenados');
@@ -23,7 +23,7 @@ export const GroupsProvider = ({ children }) => {
 
         if (storedMap) {
           const parsedMap = JSON.parse(storedMap);
-          console.log('📌 Mapa de usuarios a grupos cargado:', parsedMap);
+          // console.log('📌 Mapa de usuarios a grupos cargado:', parsedMap);
           setUserGroupsMap(parsedMap);
         } else {
           console.log('📌 No hay mapa de usuarios almacenado');
@@ -38,13 +38,13 @@ export const GroupsProvider = ({ children }) => {
 
   useEffect(() => {
     AsyncStorage.setItem('groups', JSON.stringify(groups)).then(() => {
-      console.log('✅ Grupos guardados:', groups);
+      // console.log('✅ Grupos guardados:', groups);
     });
   }, [groups]);
 
   useEffect(() => {
     AsyncStorage.setItem('userGroupsMap', JSON.stringify(userGroupsMap)).then(() => {
-      console.log('✅ Mapa usuario-grupos guardado:', userGroupsMap);
+      // console.log('✅ Mapa usuario-grupos guardado:', userGroupsMap);
     });
   }, [userGroupsMap]);
 
@@ -90,7 +90,7 @@ export const GroupsProvider = ({ children }) => {
     });
   };
 
-  const getUserGroups = (username) => {
+  const getUserGroupss = (username) => {
     const userGroupIds = userGroupsMap[username] || [];
     const result = groups.filter((group) => userGroupIds.includes(group.id));
     console.log(`👀 Grupos visibles para ${username}:`, result);
@@ -104,7 +104,7 @@ export const GroupsProvider = ({ children }) => {
         addGroup,
         deleteGroup,
         inviteUserToGroup,
-        getUserGroups,
+        getUserGroupss,
       }}
     >
       {children}

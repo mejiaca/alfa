@@ -1,15 +1,30 @@
 import React, { useContext, useState, useEffect, useCallback  } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, Modal, TextInput, Button} from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, Dimensions, Modal, TextInput, Button} from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
+import * as Linking from 'expo-linking';
 import  TopBar from '../components/TopBar';
+import  InstagramPost from '../components/InstagramPost';
 import  ItemGroup from '../components/ItemGroup';
 import { AppContext } from '../context/State';
 import { createGroup, getUserGroups } from '../context/Actions';
 
-export default function GroupListScreen({ navigation }) {
+
+const screenWidth = Dimensions.get('window').width;
+const numColumns = 2;
+const itemSize = screenWidth / numColumns;
+
+export default function GroupListScreen({navigation }) {
   const { dispatch, user, userGroups, posts, storagePath } = useContext(AppContext);
+  // const [posts, setInitialRoute] = useState(null);
+  const [groups, setGroups] = useState(null);
+  // const [user, setUsers] = useState(null);
+  // const { groups, addGroup, deleteGroup, inviteUserToGroup, } = useContext(GroupsContext);
+  // const { user } = useContext(AuthContext);
+
+
   const [modalVisible, setModalVisible] = useState(false);
   const [groupName, setGroupName] = useState('');
+  // const [userGroups, setUserGroups] = useState([]);
 
 
   useFocusEffect(
@@ -19,20 +34,32 @@ export default function GroupListScreen({ navigation }) {
   );
 
   const get_groups = () => {
-    getUserGroups(dispatch, user.user_id );
+    // getUserGroups(dispatch, user.user_id );
   };
+
+  useEffect(() => {
+    // console.log(groups)
+    // if (user?.username) {
+    //   const visibleGroups = getUserGroups(user.username);
+    //   console.log('👤 Usuario:', user.username);
+    //   console.log('📁 Todos los grupos:', groups);
+    //   console.log('👀 Grupos visibles para usuario:', visibleGroups);
+    //   setUserGroups(visibleGroups);
+    // } else {
+    //   console.log('⚠️ Usuario no cargado aún');
+    // }
+  }, [groups, user]);
 
   const handleCreateGroup = () => {
     if (!groupName.trim()) return;
 
     const newGroup = {
-      user_id: user.user_id,
+      userid: user.user_id,
       groupid: `${Date.now()}-${Math.floor(Math.random() * 100000)}`,
       name: groupName.trim(),
       timestamp: Date.now()
     };
 
-    dispatch({ type: 'SET_USER_GROUPS', payload: []});
     createGroup(dispatch, user.user_id, newGroup, get_groups);
     setGroupName('');
     setModalVisible(false);
@@ -40,20 +67,28 @@ export default function GroupListScreen({ navigation }) {
 
   const renderItem = ({ item }) => {
     return (
-      <ItemGroup dispatch={dispatch} item={item} storagePath={storagePath} user_id={user.user_id}/>
+      <ItemGroup dispatch={dispatch} item={item} storagePath={storagePath} userid={user.user_id}/>
     );
   };
+
+  // if (!user?.username) {
+  //   return (
+  //     <View style={styles.center}>
+  //       <Text>Cargando usuario...</Text>
+  //     </View>
+  //   );
+  // }
 
   return (
     <View style={{ flex: 1 }}>
 
-      <TopBar navigation={navigation}/>
+     <TopBar titulo={groupName} tipo={'grupo'} navigation={navigation} groupId={groupId}/>
 
       <FlatList
         data={userGroups}
         keyExtractor={(item, i) => i}
         renderItem={renderItem}
-        numColumns={2}
+        numColumns={numColumns}
         contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}
       />
@@ -90,9 +125,45 @@ export default function GroupListScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   container: {
-    paddingBottom:120
+    // padding: 6,
   },
 
+  content_saludo: {
+      flexDirection:'row',
+      justifyContent:'space-between',
+      marginTop:30,
+      marginBottom:40,
+      alignItems:'center',
+    },
+
+    nombre: {
+          textTransform:'capitalize',
+          // color: tema == 'oscuro' ? Colors.white : Colors.black,
+          fontSize: 25,
+          fontFamily:'Book',
+          opacity:.8
+        },
+
+  item: {
+    width: itemSize - 12,
+    margin: 6,
+    alignItems: 'center',
+  },
+  imageContainer: {
+    width: '100%',
+    aspectRatio: 1,
+  },
+  image: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  overlay: {
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    padding: 6,
+    position: 'relative',
+  },
   title: {
     color: '#fff',
     fontSize: 16,
@@ -108,11 +179,7 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     justifyContent: 'center',
     alignItems: 'center',
-    elevation:8,
-    shadowColor: '#000',
-    shadowOffset: { width: 2, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6, 
+    elevation: 4,
   },
   fabIcon: {
     fontSize: 30,
@@ -149,7 +216,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
-
+  inviteButton: {
+    position: 'absolute',
+    top: 6,
+    right: 6,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    borderRadius: 20,
+    padding: 6,
+  },
   center: {
     flex: 1,
     justifyContent: 'center',

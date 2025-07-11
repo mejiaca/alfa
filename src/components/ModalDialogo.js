@@ -3,17 +3,16 @@ import {  View, Text, FlatList, Image, StyleSheet, Alert, TextInput, Button, Mod
 import { useFocusEffect } from '@react-navigation/native';
 import  TopBar from '../components/TopBar';
 import  ItemUserPost from '../components/ItemUserPost';
-import  ModalDialogo from '../components/ModalDialogo';
 import { AppContext } from '../context/State';
 import { getUserPosts, updatePost  } from '../context/Actions';
 
 
-export default function MyPostsScreen({navigation}) {
+export default function ModalDialogo({title, tipo, modalVisible, setModalVisible, editedTitle, setEditedTitle, editedComment, setEditedComment}) {
   const { dispatch, user, userPosts } = useContext(AppContext);
   const [selectedPost, setSelectedPost] = useState(null);
-  const [editedTitle, setEditedTitle] = useState('');
-  const [editedComment, setEditedComment] = useState('');
-  const [modalVisible, setModalVisible] = useState(false);
+//   const [editedTitle, setEditedTitle] = useState('');
+//   const [editedComment, setEditedComment] = useState('');
+//   const [modalVisible, setModalVisible] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -25,65 +24,53 @@ export default function MyPostsScreen({navigation}) {
     setSelectedPost(post);
     setEditedTitle(post.title);
     setEditedComment(post.comment);
-    setModalVisible(true);
+    // setModalVisible(true);
   };
 
   const handleUpdate = () => {
-    if (!editedTitle.trim() || !editedComment.trim()) {
-      Alert.alert('Faltan datos', 'Completa todos los campos.');
-      return;
-    }
+    // if (!editedTitle.trim() || !editedComment.trim()) {
+    //   Alert.alert('Faltan datos', 'Completa todos los campos.');
+    //   return;
+    // }
 
-    updatePost({
-      ...selectedPost,
-      title: editedTitle,
-      comment: editedComment,
-    });
+    // updatePost({
+    //   ...selectedPost,
+    //   title: editedTitle,
+    //   comment: editedComment,
+    // });
 
     setModalVisible(false);
   };
 
-  const renderItem = ({ item }) => (
-    <ItemUserPost 
-      item={item}  
-      openEditModal={openEditModal} 
-      navigation={navigation} 
-      tipo={'post'}
-    />
-  );
-
-  if (userPosts.length === 0) {
-    return (
-      <View style={styles.center}>
-        <Text style={styles.noPosts}>Aún no has subido publicaciones.</Text>
-      </View>
-    );
-  }
-
   return (
-    <View style={{ flex: 1 }}>
-      <TopBar navigation={navigation}/>
+      <Modal visible={modalVisible} transparent animationType="fade">
+        <View style={styles.editModal}>
+          <View style={styles.modalBox}>
+            <Text style={styles.modalTitle}>{title}</Text>
 
-      <FlatList
-        data={userPosts}
-        keyExtractor={(item, index) => index.toString()}
-        contentContainerStyle={styles.container}
-        renderItem={renderItem}
-        showsVerticalScrollIndicator={false}
-      />
+            {tipo == 'post' ? (
+            <TextInput
+              style={styles.input}
+              placeholder="Nuevo título"
+              value={editedTitle}
+              onChangeText={setEditedTitle}
+            />
+            ):null}
 
-      <ModalDialogo 
-        tipo={'post'}
-        title={'Editar publicación'}
-        modalVisible={modalVisible} 
-        setModalVisible={setModalVisible}
-        editedTitle={editedTitle}
-        setEditedTitle={setEditedTitle}
-        editedComment={editedComment}
-        setEditedComment={setEditedComment}
-      />
-
-    </View>
+            <TextInput
+              style={[styles.input, { height: 80 }]}
+              placeholder="Nuevo comentario"
+              multiline
+              value={editedComment}
+              onChangeText={setEditedComment}
+            />
+            <View style={styles.modalButtons}>
+              <Button title="Cancelar" onPress={() => setModalVisible(false)} />
+              <Button title="Guardar" onPress={handleUpdate} />
+            </View>
+          </View>
+        </View>
+      </Modal>
   );
 }
 

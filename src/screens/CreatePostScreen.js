@@ -1,21 +1,22 @@
 import React, { useState, useContext, useEffect } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  Image,
-  Button,
-  StyleSheet,
-  Alert,
-} from 'react-native';
+import {  View, Text,  TextInput, Image, StyleSheet, Alert, KeyboardAvoidingView, Platform, Keyboard } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
+import * as ImageManipulator from 'expo-image-manipulator';
 import { PostsContext } from '../context/PostsContext';
 import { AuthContext } from '../context/AuthContext';
+import { AppContext } from '../context/State';
+import { addPost } from '../context/Actions';
+import  Boton from '../components/Boton';
+
 
 export default function CreatePostScreen({ route, navigation }) {
+  const { dispatch, user, userGroups } = useContext(AppContext);
+  const [loading, setLoading] = useState(false);
+
   const { groupId, groupName } = route.params || {};
-  const { addPost } = useContext(PostsContext);
-  const { user } = useContext(AuthContext);
+  // const { addPost } = useContext(PostsContext);
+  // const { user } = useContext(AuthContext);
 
   const [image, setImage] = useState(null);
   const [title, setTitle] = useState('');
@@ -31,14 +32,45 @@ export default function CreatePostScreen({ route, navigation }) {
       quality: 1,
     });
 
-    if (!result.canceled) {
-      setImage(result.assets[0].uri);
-    } else {
-      navigation.goBack(); // si cancela, volver atrás
+    if (!result.canceled && result.assets.length > 0) {
+      const original = result.assets[0];
+      const maxWidth = 800;
+      const scaleFactor = maxWidth / original.width;
+      const newHeight = original.height * scaleFactor;
+      const manipulated = await ImageManipulator.manipulateAsync(
+        original.uri,
+        [
+          {
+            resize: {
+              width: maxWidth,
+              height: Math.round(newHeight),
+            },
+          },
+        ],
+        {
+          compress: 0.7,
+          format: ImageManipulator.SaveFormat.JPEG,
+        }
+      );
+
+      const uri = manipulated.uri;
+      let picname = 'usuarios/'+user.user_id+'.jpg';
+      let data = {
+        foto: picname + '?' + Date.now()
+      }
+      // updateUserPic(dispatch, user.user_id, uri, picname, data);
+      setImage(uri);
     }
   };
 
+  const cancel = () => {
+    if(loading){return;}
+    navigation.goBack();
+  }
+
   const handlePost = () => {
+    if(loading){return;}
+
     if (!title.trim() || !comment.trim() || !image) {
       Alert.alert('Faltan datos', 'Completa todos los campos e incluye una imagen.');
       return;
@@ -46,37 +78,39 @@ export default function CreatePostScreen({ route, navigation }) {
 
     const uniqueId = `${Date.now()}-${Math.floor(Math.random() * 100000)}`;
 
-    addPost({
+    let post = {
       id: uniqueId,
-      image,
+      image: uniqueId + '.jpg',
       title,
       comment,
-      groupId,
       timestamp: Date.now(),
-      username: user?.username,
-    });
+      groupid:groupId,
+      user_id: user.user_id,
+    }
 
-    navigation.navigate('MainTabs', {
-      screen: 'Feed',
-      params: { groupId, groupName },
-    });
+    setLoading(true);
+    addPost(dispatch, post, image, groupId, endPost);
   };
 
-  // ✅ Verificación temprana de datos críticos
-  if (!groupId || !groupName || !user) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.warningText}>
-          Error: datos incompletos para crear publicación.
-        </Text>
-      </View>
-    );
-  }
+   const endPost = () => {
+    setLoading(false);
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'MainTabs' }],
+    });
+   }
 
   return (
+    <SafeAreaView style={styles.container}>
+          <KeyboardAvoidingView 
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={styles.keyboardView}
+          >
     <View style={styles.container}>
       {image && (
-        <Image source={{ uri: image }} style={styles.imagePreview} />
+        <View style={{justifyContent:'center', alignItems:'center'}}>
+          <Image source={{ uri: image }} style={styles.imagePreview} />
+        </View>
       )}
       <TextInput
         placeholder="Título"
@@ -91,20 +125,35 @@ export default function CreatePostScreen({ route, navigation }) {
         style={[styles.input, styles.textArea]}
         multiline
         maxLength={600}
+        blurOnSubmit={true}
+        onSubmitEditing={() => Keyboard.dismiss()} 
       />
-      <Button title="Publicar" onPress={handlePost} />
+
+      <View style={{flexDirection:'row', justifyContent:'center', alignItems:'center', marginTop:20}}>
+        <Boton titulo={'Cancelar'} onPress={cancel}/>
+        <Boton titulo={loading ? 'Publicando...':'Publicar'} onPress={handlePost}/>
+      </View>
+
+
     </View>
+    </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
+    // padding: 16,
+    flex: 1,
+    paddingHorizontal:20,
+    justifyContent:'center',
+  },
+  keyboardView: {
     flex: 1,
   },
   imagePreview: {
-    width: '100%',
-    height: 250,
+    width: 200,
+    height: 300,
     borderRadius: 10,
     marginBottom: 16,
   },

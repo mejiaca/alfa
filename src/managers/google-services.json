@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "899899260144",
+    "firebase_url": "https://levapan-default-rtdb.firebaseio.com",
+    "project_id": "levapan",
+    "storage_bucket": "levapan.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:899899260144:android:d9e0c3c504a377eba29635",
+        "android_client_info": {
+          "package_name": "com.ochorios.levapan"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "899899260144-skesd9437h8d6nnju9bag9v7civueb11.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCxHXHj1_BOEul9Q3LWGUMPsudLw0UnFYI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "899899260144-skesd9437h8d6nnju9bag9v7civueb11.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "899899260144-bi6srhuu1psi7bir43r5g7pnd9lnon5d.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.ochorios.levapan"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

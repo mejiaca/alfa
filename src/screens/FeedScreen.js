@@ -1,76 +1,44 @@
-import React, { useContext } from 'react';
-import {
-  View,
-  Text,
-  FlatList,
-  Image,
-  StyleSheet,
-  TouchableOpacity,
-  Dimensions,
-} from 'react-native';
-import { PostsContext } from '../context/PostsContext';
-
-const screenWidth = Dimensions.get('window').width;
+import React, { useContext, useCallback, useState } from 'react';
+import { View, Text,  FlatList, StyleSheet,TouchableOpacity } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
+import  TopBar from '../components/TopBar';
+import  ItemPost from '../components/ItemPost';
+import ModalGrupos from '../components/ModalGrupos';
+import ModalDialogo from '../components/ModalDialogo';
+import { AppContext } from '../context/State';
+import { getGroupPosts, getUserFavs } from '../context/Actions';
 
 export default function FeedScreen({ route, navigation }) {
-  const { posts, isPostsLoading } = useContext(PostsContext); // ✅ ahora con loading
+  const { dispatch, user, posts, storagePath } = useContext(AppContext);
   const { groupId, groupName } = route.params;
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalDialogo, setModalDialogo] = useState(false);
 
-  if (!groupId || !groupName) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.emptyText}>Error: grupo no disponible.</Text>
-      </View>
-    );
-  }
+  useFocusEffect(
+    useCallback(() => {
+      getGroupPosts(dispatch, groupId);
+      getUserFavs(dispatch, user.user_id);
+    }, [])
+  );
 
-  if (isPostsLoading) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.emptyText}>Cargando publicaciones...</Text>
-      </View>
-    );
-  }
+  const groupInfo = () => {
+    dispatch({ type: 'SET_GROUP_MEMBERS', payload: []});
+    setModalVisible(true);
+  };
 
-  const groupPosts = posts
-    .filter((post) => post.groupId === groupId)
-    .sort((a, b) => b.timestamp - a.timestamp);
-
-  const formatDate = (timestamp) => {
-    const date = new Date(timestamp);
-    return date.toLocaleDateString('es-ES', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-    });
+  const closeModal = () => {
+    setModalVisible(false);
   };
 
   const renderItem = ({ item }) => (
-    <View style={styles.card}>
-      <TouchableOpacity
-        onPress={() =>
-          navigation.navigate('ImageViewer', { image: item.image })
-        }
-      >
-        <View style={styles.imageWrapper}>
-          <Image
-            source={{ uri: item.image }}
-            style={styles.image}
-            resizeMode="cover"
-          />
-          <Text style={styles.dateText}>{formatDate(item.timestamp)}</Text>
-        </View>
-      </TouchableOpacity>
-
-      <Text style={styles.title}>{item.title}</Text>
-      <Text style={styles.description}>{item.comment}</Text>
-    </View>
+    <ItemPost item={item} storagePath={storagePath} setModalDialogo={setModalDialogo}/>
   );
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>{groupName}</Text>
-      {groupPosts.length === 0 ? (
+      <TopBar titulo={groupName} tipo={'feed'} navigation={navigation} groupId={groupId} onPress={groupInfo}/>
+
+      {posts.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyText}>
             No hay publicaciones aún. ¡Sé el primero en compartir algo!
@@ -78,10 +46,11 @@ export default function FeedScreen({ route, navigation }) {
         </View>
       ) : (
         <FlatList
-          data={groupPosts}
+          data={posts}
           keyExtractor={(item, index) => index.toString()}
           renderItem={renderItem}
           contentContainerStyle={styles.list}
+          showsVerticalScrollIndicator={false}
         />
       )}
       <TouchableOpacity
@@ -95,6 +64,20 @@ export default function FeedScreen({ route, navigation }) {
       >
         <Text style={styles.fabIcon}>＋</Text>
       </TouchableOpacity>
+
+      <ModalDialogo 
+        tipo={'comment'}
+        title={'Agregar comentario'}
+        modalVisible={modalDialogo} 
+        setModalVisible={setModalDialogo}
+        // editedTitle={editedTitle}
+        // setEditedTitle={setEditedTitle}
+        // editedComment={editedComment}
+        // setEditedComment={setEditedComment}
+      />
+
+      <ModalGrupos visible={modalVisible} closeContacts={closeModal} navigation={navigation}/>
+
     </View>
   );
 }
@@ -115,12 +98,6 @@ const styles = StyleSheet.create({
   },
   card: {
     marginBottom: 24,
-  },
-  imageWrapper: {
-    position: 'relative',
-    width: screenWidth,
-    height: screenWidth,
-    alignSelf: 'center',
   },
   image: {
     width: '100%',
@@ -152,6 +129,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 40,
+    paddingBottom:100
   },
   emptyText: {
     fontSize: 16,
