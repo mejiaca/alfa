@@ -3,8 +3,6 @@ import {  View, Text,  TextInput, Image, StyleSheet, Alert, KeyboardAvoidingView
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import * as ImageManipulator from 'expo-image-manipulator';
-import { PostsContext } from '../context/PostsContext';
-import { AuthContext } from '../context/AuthContext';
 import { AppContext } from '../context/State';
 import { addPost } from '../context/Actions';
 import  Boton from '../components/Boton';
@@ -15,8 +13,6 @@ export default function CreatePostScreen({ route, navigation }) {
   const [loading, setLoading] = useState(false);
 
   const { groupId, groupName } = route.params || {};
-  // const { addPost } = useContext(PostsContext);
-  // const { user } = useContext(AuthContext);
 
   const [image, setImage] = useState(null);
   const [title, setTitle] = useState('');

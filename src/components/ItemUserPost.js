@@ -1,11 +1,13 @@
 import React, { useContext, useState} from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, Alert, } from 'react-native';
 import { Ionicons, AntDesign } from '@expo/vector-icons';
+import ModalDialogo from './ModalDialogo';
 import { AppContext } from '../context/State';
 import { removePost, removeFav } from '../context/Actions';
 
-export default function ItemUserPost({item, openEditModal, navigation, tipo }) {
+export default function ItemUserPost({item,  navigation, tipo }) {
   const { dispatch, user, storagePath } = useContext(AppContext);
+  const [modalDialogo, setModalDialogo] = useState(false);
 
   const formatDate = (timestamp) => {
     const date = new Date(timestamp);
@@ -28,7 +30,6 @@ export default function ItemUserPost({item, openEditModal, navigation, tipo }) {
   };
 
   const deletePost = () => {
-      // dispatch({ type: 'SET_USER_GROUPS', payload: []});
     removePost(dispatch, item.id, user.user_id);
   };
 
@@ -48,9 +49,12 @@ export default function ItemUserPost({item, openEditModal, navigation, tipo }) {
   };
 
   const deleteFav = () => {
-      // dispatch({ type: 'SET_USER_GROUPS', payload: []});
     removeFav(dispatch, item.key, user.user_id);
   };
+
+  const commentDialog = () => {
+      setModalDialogo(true);
+  };   
 
   return (
     <View style={styles.imageContainer}>
@@ -73,9 +77,9 @@ export default function ItemUserPost({item, openEditModal, navigation, tipo }) {
           <View style={{flexDirection:'row', justifyContent:'flex-end', padding:5, backgroundColor:''}}>
             <TouchableOpacity
               style={[styles.iconButton, {marginRight:10}]}
-              onPress={() => openEditModal(item)}
+              onPress={commentDialog}
             >
-              <Ionicons name="pencil" size={15} color="#fff" />
+              <AntDesign name="edit" size={15} color="#fff" />
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.iconButton}
@@ -97,6 +101,16 @@ export default function ItemUserPost({item, openEditModal, navigation, tipo }) {
 
 
       </View>
+
+
+      <ModalDialogo 
+        tipo={'post'}
+        title={'Editar publicación'}
+        modalVisible={modalDialogo} 
+        setModalVisible={setModalDialogo}
+        post_id={item.id}
+        item={item}
+      />
 
     </View>
   );

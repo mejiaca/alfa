@@ -311,21 +311,21 @@ export const addPost = async (dispatch, data, image, groupId, endPost) => {
 
 export const getGroupPosts = async (dispatch, groupid) => {
   try {
-    const data = query(ref(database, databasePath + "posts/"), orderByChild("groupid"), equalTo(groupid));
-    const snapshot = await get(data);
+    const datos = query(ref(database, databasePath + "posts/"), orderByChild("groupid"), equalTo(groupid));
+    const snapshot = await get(datos);
 
     if (snapshot.exists()) {
       let objs = snapshot.val();
-      var arr = [];
+      var groups = [];
       var list = [];
 
       Object.entries(objs).forEach(([key, value]) => {
         let obj = value;
         obj.key = key
-        arr.push(obj);
+        groups.push(obj);
       });
 
-      const promise = arr.map(async (data) => {
+      const promise = groups.map(async (data) => {
         const snapshot_1 = await get(ref(database, databasePath + "usuarios/" + data.user_id));
           if (snapshot_1.exists()) {
             list.push({...data, usuario:snapshot_1.val().usuario, foto:snapshot_1.val().foto});
@@ -403,11 +403,10 @@ export const removePost = async (dispatch, key, user_id) => {
   .catch((error) => console.error("Error write db:", error));
 };
 
-export const updatePost = async (dispatch, key, user_id) => {
-  return;
-  remove(ref(database, databasePath + "posts/" + user_id + "/" + key))
+export const updatePost = async (dispatch, post_id, data, getPosts) => {
+  update(ref(database, databasePath + "posts/" + post_id), data )
   .then(() => {
-    // getFavoritos(dispatch, user_id);
+    getPosts();
   })
   .catch((error) => console.error("Error write db:", error));
 };
@@ -415,6 +414,72 @@ export const updatePost = async (dispatch, key, user_id) => {
 
 
 
+export const getPostFavs = async (post_id, setFavs) => {
+  try {
+    const snapshot = await get(query(ref(database, databasePath + "usuarios_favs/"), orderByChild("post_id"), equalTo(post_id)));
+    let count = 0;
+    if (snapshot.exists()) {
+      snapshot.forEach(() => {
+        count++;
+      });
+    }
+    setFavs(count);
+  } catch (error) {
+    console.error("Error al leer datos:", error);
+    setLoading(dispatch, false);
+  }
+};
+
+export const getPostCommentsCount = async (post_id, setComents) => {
+  try {
+    const snapshot = await get(query(ref(database, databasePath + "usuarios_coments/"), orderByChild("post_id"), equalTo(post_id)));
+    let count = 0;
+    let data = [];
+    if (snapshot.exists()) {
+      snapshot.forEach(() => {
+        count++;
+      });
+    }
+    setComents(count, data);
+  } catch (error) {
+    console.error("Error al leer datos:", error);
+    setLoading(dispatch, false);
+  }
+};
+
+export const getPostComments = async (dispatch, post_id, setComents) => {
+  try {
+    const data = query(ref(database, databasePath + "usuarios_coments/"), orderByChild("post_id"), equalTo(post_id));
+    const snapshot = await get(data);
+    if (snapshot.exists()) {
+      let objs = snapshot.val();
+      var arr = [];
+      var list = [];
+
+      Object.entries(objs).forEach(([key, value]) => {
+        let obj = value;
+        obj.key = key
+        arr.push(obj);
+      });
+
+      const promise = arr.map(async (data) => {
+        const snapshot_1 = await get(ref(database, databasePath + "usuarios/" + data.user_id));
+          if (snapshot_1.exists()) {
+            list.push({...data, nombre:snapshot_1.val().nombre, foto:snapshot_1.val().foto});
+            return;
+          }
+          return null;
+      });
+      await Promise.all(promise);
+
+      const sorted = list.sort((a, b) => b.timestamp - a.timestamp);
+      setComents(sorted);
+    }
+  } catch (error) {
+    console.error("Error al leer datos:", error);
+    setLoading(dispatch, false);
+  }
+};
 
 export const getUserFavs = async (dispatch, user_id) => {
   try {
@@ -453,16 +518,26 @@ export const getUserFavs = async (dispatch, user_id) => {
   }
 };
 
-export const setFav = async (dispatch, id, data) => {
+export const setFav = async (dispatch, id, data, getFavs) => {
   set(ref(database, databasePath + "usuarios_favs/" + id), data)
-  .then(() => {  })
+  .then(() => { getFavs(); })
   .catch((error) => console.error("Error write db:", error));
 };
 
-export const removeFav = async (dispatch, key, user_id) => {
+export const removeFav = async (dispatch, key, user_id, getFavs) => {
   remove(ref(database, databasePath + "usuarios_favs/" + key))
   .then(() => {
     getUserFavs(dispatch, user_id);
+    getFavs();
+  })
+  .catch((error) => console.error("Error write db:", error));
+};
+
+
+export const addComment = async (dispatch, data, getComments) => {
+  set(ref(database, databasePath + "usuarios_coments/" + data.id), data)
+  .then(() => {
+    getComments();
   })
   .catch((error) => console.error("Error write db:", error));
 };

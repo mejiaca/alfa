@@ -4,7 +4,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import  TopBar from '../components/TopBar';
 import  ItemUserPost from '../components/ItemUserPost';
 import { AppContext } from '../context/State';
-import { getUserFavs, removePost, updatePost  } from '../context/Actions';
+import { getUserFavs  } from '../context/Actions';
 
 export default function MyFavoritesScreen({navigation}) {
   const { dispatch, user, userFavs, storagePath } = useContext(AppContext);

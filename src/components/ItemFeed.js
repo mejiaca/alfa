@@ -1,18 +1,45 @@
-import React,{useState} from 'react';
+import React,{useState, useEffect} from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { AntDesign } from "@expo/vector-icons";
 import BotonLike from '../components/BotonLike';
+import BotonComment from '../components/BotonComment';
+import ModalComentarios from '../components/ModalComentarios';
+import { getPostFavs, getPostCommentsCount } from '../context/Actions';
 
-export default function ItemPost({dispatch, item, storagePath, setModalDialogo }) {
+export default function ItemFeed({item, storagePath }) {
   const navigation = useNavigation();
-  const [liked, setLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(0);
   const [initialComments, setinitialComments] = useState(0);
+  const [modalComents, setModalcoments] = useState(false);
+
+  useEffect(() => {
+      getFavs();
+      getComments();
+  }, []);
+
+  const getFavs = () => {
+    getPostFavs(item.id, setFavs);
+  };
+
+  const getComments = () => {
+    getPostCommentsCount(item.id, setComents);
+  };
+
+  const setFavs = (val) => {
+    setLikesCount(val);
+  };
+
+  const setComents = (val) => {
+    setinitialComments(val);
+  };
 
 
   const handleComment = () => {
+    setModalcoments(true);
+  };
 
+  const closeModal = () => {
+    setModalcoments(false);
   };
 
   const formatDate = (timestamp) => {
@@ -55,31 +82,15 @@ export default function ItemPost({dispatch, item, storagePath, setModalDialogo }
 
         <View style={styles.actions}>
           <View style={styles.leftActions}>
-
-            <BotonLike id={item.id}/>
-
-            <TouchableOpacity
-              style={styles.actionButton}
-              onPress={() => setModalDialogo(true)}
-              activeOpacity={0.7}
-            >
-              <AntDesign name={"message1"} size={25} color="rgba(28, 28, 28, 0.8)" />
-            </TouchableOpacity>
+            <BotonLike id={item.id} likesCount={likesCount} getFavs={getFavs}/>
+            <BotonComment id={item.id} commentsCount={initialComments} getComments={getComments}/>
           </View>
         </View>
   
         <View style={styles.postInfo}>
-          {likesCount > 0 && (
-            <TouchableOpacity style={styles.likesContainer}>
-              <Text style={styles.likesText}>
-                {likesCount} {likesCount === 1 ? 'me gusta' : 'me gusta'}
-              </Text>
-            </TouchableOpacity>
-          )}
 
           <View style={styles.captionContainer}>
             <Text style={styles.caption}>
-              {/* <Text style={styles.captionUsername}>{'username'} </Text> */}
               <Text style={styles.captionTitle}>{item.title}</Text>
               {item.comment && (
                 <Text style={styles.captionDescription}>
@@ -100,6 +111,9 @@ export default function ItemPost({dispatch, item, storagePath, setModalDialogo }
             </TouchableOpacity>
           )}
         </View>
+
+        <ModalComentarios post_id={item.id} visible={modalComents} titulo={item.title} closeModal={closeModal} navigation={navigation}/>
+
       </View>
   );
 

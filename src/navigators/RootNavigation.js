@@ -45,7 +45,6 @@ function MainTabs() {
                 headerShown: false,
             })}
         >
-            {/* <Tab.Screen name="Inicio" component={HomeFeedScreen} /> */}
             <Tab.Screen name="Grupos" component={GroupListScreen} />
             <Tab.Screen name="Mis Posts" component={MyPostsScreen} />
             <Tab.Screen name="Favoritos" component={MyFavoritesScreen} />

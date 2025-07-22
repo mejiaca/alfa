@@ -6,15 +6,12 @@ import {
   StyleSheet,
   TouchableOpacity,
   Alert,
-  ActivityIndicator,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImageManipulator from 'expo-image-manipulator';
-import { AntDesign, Ionicons } from '@expo/vector-icons';
-import { AuthContext } from '../context/AuthContext';
-import { PostsContext } from '../context/PostsContext';
+import { Ionicons } from '@expo/vector-icons';
 import CampoItem from '../components/CampoItem';
+import CampoInput from '../components/CampoInput';
 
 import { AppContext } from '../context/State';
 import { logOut, updateUserPic, getUser } from '../context/Actions';
@@ -22,6 +19,8 @@ import { logOut, updateUserPic, getUser } from '../context/Actions';
 export default function ProfileScreen({ navigation }) {
   const { dispatch, user, storagePath } = useContext(AppContext);
   const [profileImage, setProfileImage] = useState(null);
+  const [usuario, setUsuario] = useState("");
+  const [nombre, setNombre] = useState("");
 
   useEffect(() => {
     if(user.foto != ''){
@@ -122,6 +121,9 @@ export default function ProfileScreen({ navigation }) {
       <CampoItem titulo="Usuario:"  value={user.usuario}/>
       <CampoItem titulo="Nombre:"  value={user.nombre}/>
       <CampoItem titulo="Número Celular:"  value={user.user_id}/>
+
+      <CampoInput titulo="Usuario:"  setText={setUsuario}  value={usuario} editable={true}/>
+      <CampoInput titulo="Nombre:"  setText={setNombre}  value={nombre} editable={true}/>
       
       <View style={{marginBottom:50}}></View>
 

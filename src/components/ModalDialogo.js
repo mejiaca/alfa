@@ -1,46 +1,71 @@
 import React, { useContext, useState, useEffect, useCallback } from 'react';
-import {  View, Text, FlatList, Image, StyleSheet, Alert, TextInput, Button, Modal } from 'react-native';
+import {  View, Text, FlatList, Image, StyleSheet, Alert, TextInput, Button, Modal, Keyboard } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import  TopBar from '../components/TopBar';
-import  ItemUserPost from '../components/ItemUserPost';
 import { AppContext } from '../context/State';
-import { getUserPosts, updatePost  } from '../context/Actions';
+import { getUserPosts, updatePost, addComment  } from '../context/Actions';
 
 
-export default function ModalDialogo({title, tipo, modalVisible, setModalVisible, editedTitle, setEditedTitle, editedComment, setEditedComment}) {
-  const { dispatch, user, userPosts } = useContext(AppContext);
-  const [selectedPost, setSelectedPost] = useState(null);
-//   const [editedTitle, setEditedTitle] = useState('');
-//   const [editedComment, setEditedComment] = useState('');
-//   const [modalVisible, setModalVisible] = useState(false);
+export default function ModalDialogo({item, post_id, getComments, title, tipo, modalVisible, setModalVisible}) {
+  const { dispatch, user } = useContext(AppContext);
+  const [comment, setComment] = useState('');
+  const [editedTitle, setEditedTitle] = useState('');
+
+  useEffect(() => {
+    if(tipo == 'post' && item){
+      setEditedTitle(item.title);
+      setComment(item.comment);
+    }
+  }, [modalVisible]);
 
   useFocusEffect(
     useCallback(() => {
-      getUserPosts(dispatch, user.user_id);
+      getPosts();
     }, [])
   ); 
 
-  const openEditModal = (post) => {
-    setSelectedPost(post);
-    setEditedTitle(post.title);
-    setEditedComment(post.comment);
-    // setModalVisible(true);
-  };
+  const getPosts = () => {
+    getUserPosts(dispatch, user.user_id);
+  }
 
-  const handleUpdate = () => {
-    // if (!editedTitle.trim() || !editedComment.trim()) {
-    //   Alert.alert('Faltan datos', 'Completa todos los campos.');
-    //   return;
-    // }
+  const handleComment = () => {
+    
+    if(comment == ''){
+      Alert.alert('Faltan datos', 'Completa todos los campos.'); return;
+    }
 
-    // updatePost({
-    //   ...selectedPost,
-    //   title: editedTitle,
-    //   comment: editedComment,
-    // });
+    if(tipo == "post"){
+      if(editedTitle == ''){
+        Alert.alert('Faltan datos', 'Completa todos los campos.'); return;
+      }
 
+      let obj = {
+        title: editedTitle,
+        comment,
+      }
+      updatePost(dispatch, post_id, obj, getPosts);
+    }
+
+    if(tipo == "comment"){
+      const uniqueId = `${Date.now()}-${user.user_id}`;
+      let obj = {
+        id: uniqueId,
+        comment,
+        timestamp: Date.now(),
+        post_id:post_id,
+        user_id: user.user_id,
+      }
+      addComment(dispatch, obj, getComments);
+    }
+
+    setComment('');
     setModalVisible(false);
   };
+
+  const setTextComent = (val) => {
+    setComment(val);
+  }
+
+  
 
   return (
       <Modal visible={modalVisible} transparent animationType="fade">
@@ -54,6 +79,8 @@ export default function ModalDialogo({title, tipo, modalVisible, setModalVisible
               placeholder="Nuevo título"
               value={editedTitle}
               onChangeText={setEditedTitle}
+              blurOnSubmit={true}
+              onSubmitEditing={() => Keyboard.dismiss()} 
             />
             ):null}
 
@@ -61,12 +88,14 @@ export default function ModalDialogo({title, tipo, modalVisible, setModalVisible
               style={[styles.input, { height: 80 }]}
               placeholder="Nuevo comentario"
               multiline
-              value={editedComment}
-              onChangeText={setEditedComment}
+              value={comment}
+              onChangeText={setTextComent}
+              blurOnSubmit={true}
+              onSubmitEditing={() => Keyboard.dismiss()} 
             />
             <View style={styles.modalButtons}>
               <Button title="Cancelar" onPress={() => setModalVisible(false)} />
-              <Button title="Guardar" onPress={handleUpdate} />
+              <Button title="Guardar" onPress={handleComment} />
             </View>
           </View>
         </View>

@@ -10,11 +10,11 @@ import React, {useContext} from 'react';
 import {View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 
-const CardItemMembers = ({data, image, storagePath, onPress, admin, user_id}) => {
+const CardItemComments = ({data, image, storagePath, onPress, admin, user_id}) => {
 
   return (
     <View  style={[styles.container, {backgroundColor: '#f5f7fa'}]}   >
-      <View  style={{flex:1, flexDirection:'row',}}   >
+      <View  style={{flex:1, flexDirection:'row'}}   >
         <Image
           source={ data.foto != '' ? { uri: storagePath + data.foto }  : require('../assets/images/avatar.png') }
           style={styles.avatar}
@@ -22,24 +22,19 @@ const CardItemMembers = ({data, image, storagePath, onPress, admin, user_id}) =>
 
         <View style={styles.info_container}>
             <Text style={styles.info_title} numberOfLines={1}>{data.nombre}</Text>
+            <Text style={styles.info_comment} >{data.comment}</Text>
         </View>
       </View>
-      {admin == user_id ? (
+      {/* {admin == user_id ? (
       <TouchableOpacity style={styles.inviteButton} onPress={() => onPress(data.key, data.nombre)} >
           <AntDesign name="delete" size={15} color="#fff" />
       </TouchableOpacity>
-      ):(<>
-       {data.user_id == user_id && (
-        <TouchableOpacity style={styles.inviteButton} onPress={() => onPress(data.key, data.nombre)} >
-            <AntDesign name="delete" size={15} color="#fff" />
-        </TouchableOpacity>
-       )}
-      </>)}
+      ):null} */}
     </View>
   );
 };
 
-export default CardItemMembers;
+export default CardItemComments;
 
 const styles = StyleSheet.create({
   item_container: {
@@ -67,14 +62,19 @@ const styles = StyleSheet.create({
   },
 
   info_container: {
-    justifyContent:'center'
-    // flex: 1,
-    // height:30
+    flex:1,
+    // backgroundColor:'gray'
   },
 
   info_title: {
     fontSize: 13,
     fontWeight:'bold',
+    marginLeft:10,
+    // color: global.color.black,
+  },
+  info_comment: {
+    fontSize: 13,
+    // fontWeight:'bold',
     marginLeft:10,
     // color: global.color.black,
   },

@@ -1,19 +1,14 @@
 import React, { useContext, useState, useEffect, useCallback } from 'react';
-import {  View, Text, FlatList, Image, StyleSheet, Alert, TextInput, Button, Modal } from 'react-native';
+import {  View, Text, FlatList, StyleSheet } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import  TopBar from '../components/TopBar';
 import  ItemUserPost from '../components/ItemUserPost';
-import  ModalDialogo from '../components/ModalDialogo';
 import { AppContext } from '../context/State';
-import { getUserPosts, updatePost  } from '../context/Actions';
+import { getUserPosts  } from '../context/Actions';
 
 
 export default function MyPostsScreen({navigation}) {
   const { dispatch, user, userPosts } = useContext(AppContext);
-  const [selectedPost, setSelectedPost] = useState(null);
-  const [editedTitle, setEditedTitle] = useState('');
-  const [editedComment, setEditedComment] = useState('');
-  const [modalVisible, setModalVisible] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -21,32 +16,9 @@ export default function MyPostsScreen({navigation}) {
     }, [])
   ); 
 
-  const openEditModal = (post) => {
-    setSelectedPost(post);
-    setEditedTitle(post.title);
-    setEditedComment(post.comment);
-    setModalVisible(true);
-  };
-
-  const handleUpdate = () => {
-    if (!editedTitle.trim() || !editedComment.trim()) {
-      Alert.alert('Faltan datos', 'Completa todos los campos.');
-      return;
-    }
-
-    updatePost({
-      ...selectedPost,
-      title: editedTitle,
-      comment: editedComment,
-    });
-
-    setModalVisible(false);
-  };
-
   const renderItem = ({ item }) => (
     <ItemUserPost 
       item={item}  
-      openEditModal={openEditModal} 
       navigation={navigation} 
       tipo={'post'}
     />
@@ -70,17 +42,6 @@ export default function MyPostsScreen({navigation}) {
         contentContainerStyle={styles.container}
         renderItem={renderItem}
         showsVerticalScrollIndicator={false}
-      />
-
-      <ModalDialogo 
-        tipo={'post'}
-        title={'Editar publicación'}
-        modalVisible={modalVisible} 
-        setModalVisible={setModalVisible}
-        editedTitle={editedTitle}
-        setEditedTitle={setEditedTitle}
-        editedComment={editedComment}
-        setEditedComment={setEditedComment}
       />
 
     </View>

@@ -2,17 +2,15 @@ import React, { useContext, useCallback, useState } from 'react';
 import { View, Text,  FlatList, StyleSheet,TouchableOpacity } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import  TopBar from '../components/TopBar';
-import  ItemPost from '../components/ItemPost';
+import  ItemFeed from '../components/ItemFeed';
 import ModalGrupos from '../components/ModalGrupos';
-import ModalDialogo from '../components/ModalDialogo';
 import { AppContext } from '../context/State';
 import { getGroupPosts, getUserFavs } from '../context/Actions';
 
 export default function FeedScreen({ route, navigation }) {
   const { dispatch, user, posts, storagePath } = useContext(AppContext);
   const { groupId, groupName } = route.params;
-  const [modalVisible, setModalVisible] = useState(false);
-  const [modalDialogo, setModalDialogo] = useState(false);
+  const [modalGrupoInfo, setModalGrupoInfo] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -23,15 +21,15 @@ export default function FeedScreen({ route, navigation }) {
 
   const groupInfo = () => {
     dispatch({ type: 'SET_GROUP_MEMBERS', payload: []});
-    setModalVisible(true);
+    setModalGrupoInfo(true);
   };
 
   const closeModal = () => {
-    setModalVisible(false);
+    setModalGrupoInfo(false);
   };
 
   const renderItem = ({ item }) => (
-    <ItemPost item={item} storagePath={storagePath} setModalDialogo={setModalDialogo}/>
+    <ItemFeed item={item} storagePath={storagePath}/>
   );
 
   return (
@@ -65,18 +63,7 @@ export default function FeedScreen({ route, navigation }) {
         <Text style={styles.fabIcon}>＋</Text>
       </TouchableOpacity>
 
-      <ModalDialogo 
-        tipo={'comment'}
-        title={'Agregar comentario'}
-        modalVisible={modalDialogo} 
-        setModalVisible={setModalDialogo}
-        // editedTitle={editedTitle}
-        // setEditedTitle={setEditedTitle}
-        // editedComment={editedComment}
-        // setEditedComment={setEditedComment}
-      />
-
-      <ModalGrupos visible={modalVisible} closeContacts={closeModal} navigation={navigation}/>
+      <ModalGrupos visible={modalGrupoInfo} closeContacts={closeModal} navigation={navigation}/>
 
     </View>
   );
