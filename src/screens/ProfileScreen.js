@@ -14,11 +14,15 @@ import CampoItem from '../components/CampoItem';
 import CampoInput from '../components/CampoInput';
 
 import { AppContext } from '../context/State';
-import { logOut, updateUserPic, getUser } from '../context/Actions';
+import { logOut, updateUserPic, updateUser, getUser } from '../context/Actions';
 
 export default function ProfileScreen({ navigation }) {
   const { dispatch, user, storagePath } = useContext(AppContext);
   const [profileImage, setProfileImage] = useState(null);
+  const [namegroup, setGroupName] = useState('');
+  const [descgroup, setGroupDesc] = useState('');
+  const [editar, setEditar] = useState(false);
+
   const [usuario, setUsuario] = useState("");
   const [nombre, setNombre] = useState("");
 
@@ -82,27 +86,34 @@ export default function ProfileScreen({ navigation }) {
         text: 'Sí',
         style: 'destructive',
         onPress: async () => {
-          logOut(dispatch, salir);
-          // await logout();
-          // navigation.reset({
-          //   index: 0,
-          //   routes: [{ name: 'Login' }],
-          // });
+          logOut(dispatch, null);
         },
       },
     ]);
   };
 
   const editProfile = () => {
-
+    setGroupName(user.nombre);
+    setGroupDesc(user.usuario);
+    setEditar(true);
   };
 
-  const salir = (value) => {
-    // navigation.reset({
-    //   index: 0,
-    //   routes: [{ name: 'Login' }],
-    // });
+  const actualizar = () => {
+      if (!namegroup.trim()){ return };
+      if (descgroup == ''){ return };
+  
+      const data = {
+        nombre: namegroup,
+        usuario: descgroup
+      };
+
+      updateUser(dispatch, user.user_id, data, endPost);
+      setGroupName('');
+      setGroupDesc('');
+      setEditar(false);
   };
+
+  
 
   return (
     <View style={styles.container}>
@@ -118,24 +129,40 @@ export default function ProfileScreen({ navigation }) {
 
       <Text style={styles.username}>{user.nombre}</Text>
 
-      <CampoItem titulo="Usuario:"  value={user.usuario}/>
-      <CampoItem titulo="Nombre:"  value={user.nombre}/>
-      <CampoItem titulo="Número Celular:"  value={user.user_id}/>
+      {!editar ? (
+        <View style={{alignItems:'center', marginBottom:20}}>
 
-      <CampoInput titulo="Usuario:"  setText={setUsuario}  value={usuario} editable={true}/>
-      <CampoInput titulo="Nombre:"  setText={setNombre}  value={nombre} editable={true}/>
-      
-      <View style={{marginBottom:50}}></View>
+        <CampoItem titulo="Usuario:"  value={user.usuario}/>
+        <CampoItem titulo="Nombre:"  value={user.nombre}/>
+        <CampoItem titulo="Número Celular:"  value={user.user_id}/>
+        <View style={{marginBottom:50}}></View>
 
-      <View style={{flexDirection:'row'}}>
-        <TouchableOpacity style={styles.editarButton} onPress={editProfile}>
-          <Text style={styles.logoutText}>Editar</Text>
-        </TouchableOpacity>
+        <View style={{flexDirection:'row'}}>
+          <TouchableOpacity style={styles.editarButton} onPress={editProfile}>
+            <Text style={styles.logoutText}>Editar</Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <Text style={styles.logoutText}>Cerrar sesión</Text>
-        </TouchableOpacity>
+          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+            <Text style={styles.logoutText}>Cerrar sesión</Text>
+          </TouchableOpacity>
+        </View>
+
       </View>
+      ):(
+        <View style={{alignItems:'center', marginBottom:20}}>
+          <CampoInput titulo="Usuario:" setText={setGroupDesc} capitalize={'none'} value={descgroup} editable={true} maxLength={20}/>
+          <CampoInput titulo="Nombre:" setText={setGroupName} capitalize={'words'} value={namegroup} editable={true} maxLength={60}/>
+          <View style={{flexDirection:'row', marginTop:10}}>
+              <TouchableOpacity style={styles.editarButton} onPress={()=>setEditar(false)}>
+                  <Text style={styles.logoutText}>cancelar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.logoutButton} onPress={actualizar}>
+                  <Text style={styles.logoutText}>Actualizar</Text>
+              </TouchableOpacity>
+          </View>
+      </View>
+      )}      
+      
 
       <Text style={styles.note}>versión: 1.0.1</Text>
     </View>

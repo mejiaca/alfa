@@ -61,7 +61,7 @@ const TopBar = ({titulo, tipo='normal', navigation, groupId, close, onPress }) =
 
             <View style={{flex:1, marginLeft:10}}>
               <Text style={styles.usuario}>{user.usuario}</Text>
-              <Text style={styles.nombre} numberOfLines={1}>Hola, {user.nombre}</Text>
+              {/* <Text style={styles.nombre} numberOfLines={1}>Hola, {user.nombre}</Text> */}
               <SearchFilter setSearchText={buscarGroup} />
             </View>
           </View>

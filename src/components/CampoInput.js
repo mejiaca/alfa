@@ -11,7 +11,7 @@ import {Text, View, StyleSheet, TextInput, TouchableOpacity, Platform } from 're
 import global from '../managers/Global';
 import Colors from '../constants/Colors';
 
-const CampoInput = ({  setText,  titulo = '', value = '', tipo = 'default', capitalize = "sentences", boton = false, multiline=false, onPress, editable = false }) => {
+const CampoInput = ({  setText,  titulo = '', value = '', tipo = 'default', capitalize = "sentences", boton = false, multiline=false, onPress, editable = false, maxLength=100 }) => {
 
   return (
     <>
@@ -44,6 +44,7 @@ const CampoInput = ({  setText,  titulo = '', value = '', tipo = 'default', capi
                 keyboardType={tipo}
                 value={value}
                 multiline = {multiline}
+                maxLength={maxLength}
                 blurOnSubmit = {true}
                 onChangeText={(e) => setText(e)}
                 returnKeyType={ 'done' }
@@ -86,12 +87,13 @@ const styles = StyleSheet.create({
   titulo: {
     color:Colors.black,
     fontFamily: 'Bold',
+    fontWeight:'bold',
     textTransform:'capitalize'
   },
 
   textInput_container: {
     flex:1,
-    paddingLeft:10,
+    paddingLeft:20
     // backgroundColor:'gray'
   },
 

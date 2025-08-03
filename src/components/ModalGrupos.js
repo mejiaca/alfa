@@ -7,18 +7,23 @@
  */
 
 import React, { useContext, useState, useEffect } from 'react';
-import { StyleSheet, FlatList, View, Text, Modal, TouchableOpacity, Alert} from 'react-native';
-import { AntDesign } from '@expo/vector-icons';
+import { StyleSheet, FlatList, View, Text, Modal, TouchableOpacity, Alert,  Image} from 'react-native';
+import { AntDesign, Ionicons } from '@expo/vector-icons';
+import { formatFecha} from '../managers/Global';
 import CardItemMembers from '../components/CardItemMembers';
-import {AppContext} from '../context/State';
-import  TopBar from '../components/TopBar';
+import AvatarPerfil from '../components/AvatarPerfil';
+import TopBar from '../components/TopBar';
 import CampoItem from '../components/CampoItem';
-import { getGroupMembers, removeGroup, removeMember } from '../context/Actions';
-import {formatFecha} from '../managers/Global';
+import CampoInput from '../components/CampoInput';
+import {AppContext} from '../context/State';
+import { getGroupMembers, removeGroup, removeMember, updateGroup } from '../context/Actions';
 
 
 const ModalGrupos = ({closeContacts, visible, navigation}) => {
     const { dispatch, user, participantes, groupInfo, storagePath } = useContext(AppContext);
+    const [namegroup, setGroupName] = useState('');
+    const [descgroup, setGroupDesc] = useState('');
+    const [editar, setEditar] = useState(false);
 
     useEffect(() => {
         if(visible){
@@ -58,7 +63,9 @@ const ModalGrupos = ({closeContacts, visible, navigation}) => {
     }
 
     const edit = () => {
-        // closeContacts();
+        setGroupName(groupInfo.name);
+        setGroupDesc(groupInfo.description);
+        setEditar(true);
     };
 
     const invitar = () => {
@@ -89,6 +96,22 @@ const ModalGrupos = ({closeContacts, visible, navigation}) => {
         removeMember(dispatch, key, groupInfo.groupid);
     };
 
+    const actualizar = () => {
+        if (!namegroup.trim()){ return };
+        if (descgroup == ''){ return };
+    
+        const data = {
+          name: namegroup,
+          description: descgroup
+        };
+        
+        dispatch({ type: 'SET_USER_GROUPS', payload: []});
+        updateGroup(dispatch, groupInfo.groupid, data, endGroup);
+        setGroupName('');
+        setGroupDesc('');
+        setEditar(false);
+    };
+
     return (
         <Modal visible={visible} transparent animationType="fade">
             <View style={styles.modalBackground}>
@@ -96,7 +119,33 @@ const ModalGrupos = ({closeContacts, visible, navigation}) => {
                 <TopBar titulo={groupInfo.user_id == user.user_id ? 'Admin Grupo':'Participantes'} tipo={'modal'} close={close} />
 
                 <View style={{paddingHorizontal:10,  paddingTop:20}}>
-                    <CampoItem titulo="Grupo:"  value={groupInfo.name}/>
+                    <AvatarPerfil item={groupInfo} foto={groupInfo.foto} endGroup={endGroup} />
+
+                    {!editar ? (
+                        <View style={{}}>
+                            <CampoItem titulo="Grupo:"  value={groupInfo.name}/>
+                            <CampoItem titulo="Descripción:"  value={groupInfo.description}/>
+                        </View>
+                    ):(
+                        <View style={{alignItems:'center', marginBottom:20}}>
+                            <CampoInput titulo="Grupo:" capitalize={'words'} setText={setGroupName} value={namegroup} editable={true} multiline={true} maxLength={20}/>
+                            <CampoInput titulo="Descripción:" setText={setGroupDesc} value={descgroup} editable={true}  multiline={true} maxLength={60}/>
+                            <View style={{flexDirection:'row', marginTop:10}}>
+                                <TouchableOpacity style={styles.editarButton} onPress={()=>setEditar(false)}>
+                                    <Text style={styles.logoutText}>cancelar</Text>
+                                </TouchableOpacity>
+                        
+                                <TouchableOpacity style={styles.logoutButton} onPress={actualizar}>
+                                    <Text style={styles.logoutText}>Actualizar</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    )}
+
+                    
+
+                    <View style={{paddingTop:10}} />
+
                     <CampoItem titulo="Administrador:"  value={groupInfo.nombre}/>
                     <CampoItem titulo="Fecha:"  value={formatFecha(groupInfo.timestamp)}/>
 
@@ -129,6 +178,7 @@ const ModalGrupos = ({closeContacts, visible, navigation}) => {
                 />
 
             </View>
+
         </Modal>
     )
 }
@@ -157,9 +207,30 @@ const styles = StyleSheet.create({
     iconButton: {
         width:40,
         height:40,
-        backgroundColor: 'rgba(0,0,0,0.6)',
+        backgroundColor: 'rgba(0,0,0,0.5)',
         borderRadius: 20,
         justifyContent:'center',
         alignItems:'center'
+    },
+
+
+    editarButton: {
+        backgroundColor: 'rgb(0,0,0)',
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 6,
+        marginRight:20
+    },
+
+    logoutButton: {
+        backgroundColor: '#ff3b30',
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 6,
+    },
+
+    logoutText: {
+        color: 'white',
+        // fontSize: 16,
     },
 });

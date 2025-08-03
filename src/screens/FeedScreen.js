@@ -19,7 +19,7 @@ export default function FeedScreen({ route, navigation }) {
     }, [])
   );
 
-  const groupInfo = () => {
+  const groupDetails = () => {
     dispatch({ type: 'SET_GROUP_MEMBERS', payload: []});
     setModalGrupoInfo(true);
   };
@@ -34,7 +34,7 @@ export default function FeedScreen({ route, navigation }) {
 
   return (
     <View style={styles.container}>
-      <TopBar titulo={groupName} tipo={'feed'} navigation={navigation} groupId={groupId} onPress={groupInfo}/>
+      <TopBar titulo={groupName} tipo={'feed'} navigation={navigation} groupId={groupId} onPress={groupDetails}/>
 
       {posts.length === 0 ? (
         <View style={styles.emptyContainer}>

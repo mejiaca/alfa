@@ -76,6 +76,7 @@ const styles = StyleSheet.create({
 
   textInput_container: {
     flex:1,
+    paddingLeft:20
   },
 
   textInput: {

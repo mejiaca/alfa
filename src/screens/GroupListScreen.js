@@ -1,8 +1,9 @@
 import React, { useContext, useState, useEffect, useCallback  } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, Modal, TextInput, Button} from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import  TopBar from '../components/TopBar';
-import  ItemGroup from '../components/ItemGroup';
+import TopBar from '../components/TopBar';
+import ItemGroup from '../components/ItemGroup';
+import ModalGrupos from '../components/ModalGrupos';
 import { AppContext } from '../context/State';
 import { createGroup, getUserGroups } from '../context/Actions';
 
@@ -10,6 +11,8 @@ export default function GroupListScreen({ navigation }) {
   const { dispatch, user, userGroups, posts, storagePath } = useContext(AppContext);
   const [modalVisible, setModalVisible] = useState(false);
   const [groupName, setGroupName] = useState('');
+  const [groupDesc, setGroupDesc] = useState('');
+  const [modalGrupoInfo, setModalGrupoInfo] = useState(false);
 
 
   useFocusEffect(
@@ -22,25 +25,47 @@ export default function GroupListScreen({ navigation }) {
     getUserGroups(dispatch, user.user_id );
   };
 
+  
+
   const handleCreateGroup = () => {
     if (!groupName.trim()) return;
+    if (groupDesc == '') return;
 
     const newGroup = {
       user_id: user.user_id,
+      foto: "grupos/logo_grupo.png",
       groupid: `${Date.now()}-${Math.floor(Math.random() * 100000)}`,
       name: groupName.trim(),
+      description: groupDesc,
       timestamp: Date.now()
     };
 
     dispatch({ type: 'SET_USER_GROUPS', payload: []});
     createGroup(dispatch, user.user_id, newGroup, get_groups);
     setGroupName('');
+    setGroupDesc('');
     setModalVisible(false);
+  };
+
+  const groupDetails = (item) => {
+    dispatch({ type: 'SET_GROUP_MEMBERS', payload: []});
+    dispatch({ type: 'SET_GROUP_INFO', payload: item});
+    setModalGrupoInfo(true);
+  };
+
+  const closeModal = () => {
+    setModalGrupoInfo(false);
   };
 
   const renderItem = ({ item }) => {
     return (
-      <ItemGroup dispatch={dispatch} item={item} storagePath={storagePath} user_id={user.user_id}/>
+      <ItemGroup 
+        dispatch={dispatch} 
+        item={item} 
+        storagePath={storagePath} 
+        user_id={user.user_id}
+        onPress={groupDetails}
+      />
     );
   };
 
@@ -53,7 +78,6 @@ export default function GroupListScreen({ navigation }) {
         data={userGroups}
         keyExtractor={(item, i) => i}
         renderItem={renderItem}
-        numColumns={2}
         contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}
       />
@@ -72,9 +96,20 @@ export default function GroupListScreen({ navigation }) {
             <TextInput
               placeholder="Nombre del grupo"
               value={groupName}
+              autoCapitalize='words'
               onChangeText={setGroupName}
               style={styles.input}
-              maxLength={15}
+              maxLength={20}
+            />
+            <Text style={styles.modalTitle}>Descripción</Text>
+            <TextInput
+              placeholder="Descripción del grupo"
+              value={groupDesc}
+              onChangeText={setGroupDesc}
+              style={styles.input}
+              multiline
+              maxLength={60}
+              blurOnSubmit
             />
             <View style={styles.modalButtons}>
               <Button title="Cancelar" onPress={() => setModalVisible(false)} />
@@ -83,6 +118,9 @@ export default function GroupListScreen({ navigation }) {
           </View>
         </View>
       </Modal>
+
+
+      <ModalGrupos visible={modalGrupoInfo} closeContacts={closeModal} navigation={navigation}/>
 
     </View>
   );

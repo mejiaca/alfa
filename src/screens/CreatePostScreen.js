@@ -113,6 +113,7 @@ export default function CreatePostScreen({ route, navigation }) {
         value={title}
         onChangeText={setTitle}
         style={styles.input}
+        maxLength={20}
       />
       <TextInput
         placeholder="Comentario (máx. 100 palabras)"
@@ -120,7 +121,7 @@ export default function CreatePostScreen({ route, navigation }) {
         onChangeText={setComment}
         style={[styles.input, styles.textArea]}
         multiline
-        maxLength={600}
+        maxLength={300}
         blurOnSubmit={true}
         onSubmitEditing={() => Keyboard.dismiss()} 
       />

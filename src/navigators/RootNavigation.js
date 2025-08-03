@@ -18,6 +18,7 @@ import ProfileScreen from '../screens/ProfileScreen';
 import FeedScreen from '../screens/FeedScreen';
 import CreatePostScreen from '../screens/CreatePostScreen';
 import InviteUsersScreen from '../screens/InviteUsersScreen';
+import CommentsUsersScreen from '../screens/CommentsUsersScreen';
 import ImageViewerScreen from '../screens/ImageViewerScreen';
 
 const Tab = createBottomTabNavigator();
@@ -62,7 +63,8 @@ function RootNavigation({ navigation }) {
         >
             <Stack.Screen name="MainTabs" component={MainTabs} />
             <Stack.Screen name="Feed" component={FeedScreen} />
-            <Stack.Screen name="InviteUsers" component={InviteUsersScreen} />
+            <Stack.Screen name="InviteUsers" component={InviteUsersScreen}/>
+            <Stack.Screen name="CommentsUsers" component={CommentsUsersScreen}  options={{ contentStyle: { backgroundColor: 'transparent' }, presentation: 'modal', headerShown: false }}/>
             <Stack.Screen name="CreatePost" component={CreatePostScreen} />
             <Stack.Screen name="ImageViewer" component={ImageViewerScreen} />
             <Stack.Screen name="EditGroup" component={GroupEditScreen} />

@@ -35,7 +35,12 @@ export default function ItemFeed({item, storagePath }) {
 
 
   const handleComment = () => {
-    setModalcoments(true);
+    // setModalcoments(true);
+
+    navigation.navigate('CommentsUsers', {
+      postId: item.id,
+      groupName: item.name,
+    });
   };
 
   const closeModal = () => {

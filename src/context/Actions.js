@@ -75,7 +75,8 @@ export const getUser = async (dispatch, user_id, ingresar) => {
 export const logOut = async (dispatch, salir) => {
   try {
     await signOut(auth);
-    await AsyncStorage.removeItem('user_id');
+    // await AsyncStorage.removeItem('user_id');
+    await AsyncStorage.clear();
     dispatch({ type: 'SET_USER', payload: {}});
     dispatch({ type: 'SET_USER_AUTH', payload: false});
     dispatch({ type: 'SET_USER_GROUPS', payload: []});
@@ -108,10 +109,26 @@ export const createUser = async (dispatch, data, urifoto, nombrefoto, ingresar) 
   }
 };
 
+export const updateUser = async (dispatch, userid, data, endPost) => {
+  update(ref(database, databasePath + "usuarios/" + userid), data)
+  .then(() => {
+    endPost(true, userid);
+  })
+  .catch((error) => console.error("Error write db:", error));
+};
+
 export const updateUserPic = async (dispatch, userid, image, picname, data, endPost) => {
   update(ref(database, databasePath + "usuarios/" + userid), data)
   .then(() => {
     setImagen(image, picname, endPost, userid);
+  })
+  .catch((error) => console.error("Error write db:", error));
+};
+
+export const updateGroupPic = async (dispatch, groupid, image, picname, data, endPost) => {
+  update(ref(database, databasePath + "grupos/" + groupid), data)
+  .then(() => {
+    setImagen(image, picname, endPost, groupid);
   })
   .catch((error) => console.error("Error write db:", error));
 };
@@ -283,6 +300,14 @@ export const getGroupMembers = async (dispatch, groupid) => {
   }
 };
 
+export const updateGroup = async (dispatch, groupid, data, endGroup) => {
+  update(ref(database, databasePath + "grupos/" + groupid), data)
+  .then(() => {
+    endGroup();
+  })
+  .catch((error) => console.error("Error write db:", error));
+};
+
 export const removeGroup = async (key, endGroup) => {
   remove(ref(database, databasePath + "grupos/" + key))
   .then(() => {
@@ -360,7 +385,7 @@ export const getImagePost = async (groupid, setimage) => {
         arr.push(obj);
       });
       const sorted = arr.sort((a, b) => b.timestamp - a.timestamp);
-      setimage(sorted[0].image);
+      setimage(sorted[0].image, parseInt(arr.length));
     }
 
   } catch (error) {
